@@ -99,7 +99,6 @@ function FeatureTabs({
         )}
       </div>
 
-      <div className="sidebar-note">📚 Keep learning, keep growing!</div>
     </aside>
   );
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FEATURES } from "./features.js";
 import FeatureTabs from "./components/FeatureTabs.jsx";
 import InputForm from "./components/InputForm.jsx";
@@ -15,22 +15,17 @@ import {
   API_BASE,
   apiRequest,
   getToken,
-  getStoredUser,
   saveSession,
   clearSession,
 } from "./utils/api.js";
-import { hasGuestPreference, setGuestPreference, clearGuestPreference } from "./utils/guest.js";
+import { clearGuestPreference } from "./utils/guest.js";
 
 const API_URL = `${API_BASE}/api/generate`;
 const LEVEL_IDS = ["beginner", "intermediate", "advanced"];
 
-// Which screen to show first:
-// - a saved login            -> home page
-// - a remembered guest choice -> home page
-// - a new visitor            -> welcome screen
+// Always ask the visitor to choose Sign In / Create Account or Continue as Guest
+// whenever the frontend is opened. A saved session will not skip this welcome screen.
 function getInitialPage() {
-  if (getToken() && getStoredUser()) return "home";
-  if (hasGuestPreference()) return "home";
   return "welcome";
 }
 
@@ -39,7 +34,7 @@ function App() {
   const [page, setPage] = useState(getInitialPage);
 
   // ----- Login state (null = guest) -----
-  const [user, setUser] = useState(() => (getToken() ? getStoredUser() : null));
+  const [user, setUser] = useState(null);
 
   // ----- State: data that changes and makes the screen update -----
   const [selectedId, setSelectedId] = useState(FEATURES[0].id); // which feature is active
@@ -53,29 +48,6 @@ function App() {
 
   const feature = FEATURES.find((f) => f.id === selectedId);
 
-  // When the app opens with a saved login, check that it is still valid
-  useEffect(() => {
-    const token = getToken();
-    if (!token) return;
-
-    apiRequest("/api/auth/me", { auth: true })
-      .then((data) => {
-        saveSession(token, data.user);
-        setUser(data.user);
-        // A valid login never needs the welcome screen
-        setPage((current) => (current === "welcome" ? "home" : current));
-      })
-      .catch((err) => {
-        if (err.status === 401) {
-          // The login expired or is invalid
-          clearSession();
-          setUser(null);
-          // A visitor with no guest choice goes back to the welcome screen
-          setPage((current) => (current === "home" && !hasGuestPreference() ? "welcome" : current));
-        }
-        // Other errors (server or database down): keep the saved login for now
-      });
-  }, []);
 
   function clearAll() {
     setValues({});
@@ -115,9 +87,11 @@ function App() {
     setPage("login");
   }
 
-  // "Continue as Guest": remember the choice (a screen preference only, NOT a login)
+  // "Continue as Guest": clear any saved login so guest mode is genuinely unauthenticated.
   function handleChooseGuest() {
-    setGuestPreference();
+    clearSession();
+    clearGuestPreference();
+    setUser(null);
     clearAll();
     setPage("home");
   }

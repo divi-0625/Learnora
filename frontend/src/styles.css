@@ -361,8 +361,22 @@ textarea:focus-visible {
 }
 .sidebar-nav {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 6px;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 3px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(36, 91, 97, 0.28) transparent;
+}
+.sidebar-nav::-webkit-scrollbar {
+  width: 5px;
+}
+.sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(36, 91, 97, 0.24);
+  border-radius: 999px;
 }
 .nav-item {
   display: flex;
@@ -404,16 +418,6 @@ textarea:focus-visible {
 .nav-item:disabled {
   opacity: 0.55;
   cursor: not-allowed;
-}
-.sidebar-note {
-  margin-top: auto;
-  padding: 14px;
-  font-size: 0.88rem;
-  font-weight: 700;
-  text-align: center;
-  color: #5b5880;
-  background: linear-gradient(135deg, #ece9ff, #fff3cf);
-  border-radius: 16px;
 }
 
 .content {
@@ -853,10 +857,12 @@ textarea:focus-visible {
     border-bottom: 1px solid var(--line);
   }
   .sidebar-nav {
+    flex: 0 0 auto;
     flex-direction: row;
     gap: 8px;
     padding-bottom: 4px;
     overflow-x: auto;
+    overflow-y: hidden;
   }
   .nav-item {
     flex-shrink: 0;
@@ -865,9 +871,6 @@ textarea:focus-visible {
   }
   .nav-item:hover:not(:disabled) {
     transform: none;
-  }
-  .sidebar-note {
-    display: none;
   }
   .content {
     padding: 20px 16px 12px;
@@ -1264,9 +1267,6 @@ textarea:focus-visible {
   background: #f7f5ff;
   border: 1px solid var(--line);
   border-radius: 14px;
-}
-.sidebar-user + .sidebar-note {
-  margin-top: 0;
 }
 .sidebar-user-name {
   font-size: 0.92rem;
@@ -2333,11 +2333,9 @@ textarea:focus-visible,
   background: #ffffff;
 }
 .sidebar-user {
+  flex: 0 0 auto;
+  margin-top: 0;
   background: rgba(216, 235, 232, 0.5);
-}
-.sidebar-note {
-  color: var(--muted);
-  background: linear-gradient(135deg, #d8ebe8, #f4faf9);
 }
 .card,
 .result,
